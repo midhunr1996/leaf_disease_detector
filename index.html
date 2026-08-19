@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍃 Leaf Health Detector — Good vs Bad Leaf</title>
+  <meta name="description" content="Detect good vs bad leaves in your browser with YOLOv12. Upload an image or use your webcam — nothing leaves your device." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="leaf">🍃</span>
+      <div>
+        <h1>Leaf Health Detector</h1>
+        <p class="tag">YOLOv12 · runs 100% in your browser · nothing is uploaded</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Model status -->
+    <div id="status" class="status loading">Loading model…</div>
+
+    <!-- Tabs -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="upload">📁 Upload image</button>
+      <button class="tab" data-tab="webcam">📷 Live webcam</button>
+    </nav>
+
+    <!-- Controls -->
+    <section class="controls">
+      <label>
+        Confidence
+        <input type="range" id="conf" min="0.05" max="0.95" step="0.05" value="0.35" />
+        <span id="confVal">0.35</span>
+      </label>
+      <div id="fps" class="fps"></div>
+    </section>
+
+    <!-- UPLOAD PANEL -->
+    <section id="panel-upload" class="panel active">
+      <label for="fileInput" class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" accept="image/*" hidden />
+        <span class="dz-icon">⬆️</span>
+        <span>Click or drop an image here</span>
+      </label>
+      <div class="stage">
+        <canvas id="uploadCanvas"></canvas>
+      </div>
+      <button id="downloadBtn" class="btn hidden">⬇️ Download annotated image</button>
+    </section>
+
+    <!-- WEBCAM PANEL -->
+    <section id="panel-webcam" class="panel">
+      <div class="webcam-controls">
+        <button id="startCam" class="btn">▶️ Start camera</button>
+        <button id="stopCam" class="btn secondary hidden">⏹ Stop camera</button>
+        <button id="switchCam" class="btn secondary hidden">🔄 Flip camera</button>
+      </div>
+      <div class="stage">
+        <video id="video" playsinline muted></video>
+        <canvas id="webcamCanvas"></canvas>
+      </div>
+    </section>
+
+    <p class="hint">Detections and counts appear here in real time. On phones, use the <b>Live webcam</b> tab and allow camera access.</p>
+    <div id="counts" class="counts"></div>
+  </main>
+
+  <footer>
+    <p>Built with <a href="https://github.com/ultralytics/ultralytics" target="_blank" rel="noopener">YOLOv12</a>
+       + <a href="https://onnxruntime.ai/docs/tutorials/web/" target="_blank" rel="noopener">ONNX Runtime Web</a>.
+       Open source — everything runs on your device.</p>
+  </footer>
+
+  <!-- ONNX Runtime Web (WASM/SIMD) -->
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/ort.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

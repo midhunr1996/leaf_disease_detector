@@ -1,0 +1,12 @@
+# Training artifacts (keep the repo light — only best.onnx is needed)
+runs/
+datasets/
+*.pt
+*-1/
+__pycache__/
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
