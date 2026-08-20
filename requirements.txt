@@ -1,0 +1,13 @@
+# Python packages for TRAINING + exporting the model (train_yolov12.ipynb).
+# The website itself needs NO Python packages — it runs in the browser via
+# ONNX Runtime Web (loaded from a CDN).
+#
+# Install with:   pip install -r requirements.txt
+# (Colab already has most of these; this file is for running locally.)
+
+ultralytics>=8.3.0     # YOLOv12 training, validation, and ONNX export
+roboflow>=1.1.0        # download the dataset from Roboflow
+onnx>=1.16.0           # ONNX model format
+onnxslim>=0.1.34       # simplifies the exported ONNX graph (export simplify=True)
+onnxruntime>=1.18.0    # run/verify the ONNX model in Python
+PyYAML>=6.0            # read class names from data.yaml (used in the notebook)
