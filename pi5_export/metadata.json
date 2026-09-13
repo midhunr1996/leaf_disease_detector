@@ -1,0 +1,21 @@
+{
+  "model": "YOLO26s",
+  "imgsz": 640,
+  "class_names": [
+    "Nondefect",
+    "defect"
+  ],
+  "nc": 2,
+  "end_to_end": false,
+  "input_name": "images",
+  "output_shapes": [
+    [
+      1,
+      6,
+      8400
+    ]
+  ],
+  "preprocess": "RGB, letterbox 114, /255, NCHW float32",
+  "fp32": "YOLO26s_640_fp32.onnx",
+  "int8": "YOLO26s_640_int8.onnx"
+}

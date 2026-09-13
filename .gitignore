@@ -13,3 +13,8 @@ pi/.env
 .playwright-mcp/
 overleaf_cache/
 *.zip
+
+# Only the selected export is published; the other variants stay local
+pi5_export/YOLO11s*
+pi5_export/YOLO12s*
+pi5_export/YOLO26s_640_int8.onnx

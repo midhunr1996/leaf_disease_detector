@@ -133,7 +133,10 @@ async function loadModel() {
       ? Math.min(navigator.hardwareConcurrency || 4, 8) : 1;
     ort.env.wasm.simd = true;
     setLed("model", "warn", "loading...");
-    const path = ($("setModel") && $("setModel").value) || "model/best.onnx";
+    // The exported models live in pi5_export/. The old model/ folder held
+    // earlier training runs and is no longer used by anything.
+    const path = ($("setModel") && $("setModel").value)
+               || "pi5_export/YOLO26s_640_fp32.onnx";
 
     // Prefer the GPU. WASM stays as the fallback for machines without WebGPU.
     const eps = [];
