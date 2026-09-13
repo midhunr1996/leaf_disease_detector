@@ -1,0 +1,21 @@
+# Python packages for the Raspberry Pi 5 deployment.
+# Install inside a venv created with --system-site-packages, so the
+# apt-installed python3-libgpiod stays visible:
+#
+#   python3 -m venv --system-site-packages ~/leaf/venv
+#   ~/leaf/venv/bin/pip install -r requirements.txt
+#
+# Do NOT add RPi.GPIO. It cannot reach the Pi 5's pins (the RP1 controller
+# moved them), and if it is installed gpiozero may select it and fail.
+
+onnxruntime>=1.17
+opencv-python-headless>=4.9
+numpy>=1.26
+flask>=3.0
+
+# GPIO. gpiozero needs lgpio as its backend on the Pi 5.
+gpiozero>=2.0.1
+lgpio>=0.2.2
+
+# Only needed by uploader.py, for pushing records to the database.
+requests>=2.31

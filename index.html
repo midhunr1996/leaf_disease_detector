@@ -1,81 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🍃 Leaf Health Detector — Good vs Bad Leaf</title>
-  <meta name="description" content="Detect good vs bad leaves in your browser with YOLOv12. Upload an image or use your webcam — nothing leaves your device." />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tea Leaf Inspection</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="app">
   <header class="topbar">
-    <div class="brand">
-      <span class="leaf">🍃</span>
-      <div>
-        <h1>Leaf Health Detector</h1>
-        <p class="tag">YOLOv12 · runs 100% in your browser · nothing is uploaded</p>
-      </div>
-    </div>
+    <div class="brand"><span class="dot"></span> TEA LEAF INSPECTION</div>
+    <nav class="tabs">
+      <button class="tab active" data-page="live">LIVE</button>
+      <button class="tab" data-page="records">RECORDS</button>
+      <button class="tab" data-page="stats">STATISTICS</button>
+      <button class="tab" data-page="settings">SETTINGS</button>
+    </nav>
+    <div class="runstate" id="runState">STANDBY</div>
   </header>
 
-  <main>
-    <!-- Model status -->
-    <div id="status" class="status loading">Loading model…</div>
+  <div id="guide" class="guide info">
+    <span class="gdot"></span>
+    <span id="guideText">Starting up.</span>
+    <button id="guideAck" class="btn small" hidden>ACKNOWLEDGE</button>
+  </div>
 
-    <!-- Tabs -->
-    <nav class="tabs">
-      <button class="tab active" data-tab="upload">📁 Upload image</button>
-      <button class="tab" data-tab="webcam">📷 Live webcam</button>
-    </nav>
-
-    <!-- Controls -->
-    <section class="controls">
-      <label>
-        Confidence
-        <input type="range" id="conf" min="0.05" max="0.95" step="0.05" value="0.35" />
-        <span id="confVal">0.35</span>
-      </label>
-      <div id="fps" class="fps"></div>
-    </section>
-
-    <!-- UPLOAD PANEL -->
-    <section id="panel-upload" class="panel active">
-      <label for="fileInput" class="dropzone" id="dropzone">
-        <input type="file" id="fileInput" accept="image/*" hidden />
-        <span class="dz-icon">⬆️</span>
-        <span>Click or drop an image here</span>
-      </label>
-      <div class="stage">
-        <canvas id="uploadCanvas"></canvas>
+  <section class="page active" id="page-live">
+    <div class="grid">
+      <div class="panel">
+        <div class="panel-title">LIVE VIEW <span id="fps" class="mono"></span></div>
+        <div class="stage">
+          <video id="video" playsinline muted></video>
+          <canvas id="canvas"></canvas>
+          <div id="viewHint" class="hint">Start the camera or load an image</div>
+        </div>
       </div>
-      <button id="downloadBtn" class="btn hidden">⬇️ Download annotated image</button>
-    </section>
 
-    <!-- WEBCAM PANEL -->
-    <section id="panel-webcam" class="panel">
-      <div class="webcam-controls">
-        <button id="startCam" class="btn">▶️ Start camera</button>
-        <button id="stopCam" class="btn secondary hidden">⏹ Stop camera</button>
-        <button id="switchCam" class="btn secondary hidden">🔄 Flip camera</button>
+      <div class="side">
+        <div class="panel">
+          <div class="panel-title">CONTROLS</div>
+          <div class="btn-row">
+            <button id="btnStart" class="btn go">START CAMERA</button>
+            <button id="btnStop" class="btn">STOP</button>
+          </div>
+          <button id="btnEstop" class="btn estop">EMERGENCY STOP</button>
+          <div class="btn-row">
+            <button id="btnMotorStart" class="btn small go">MOTOR START</button>
+            <button id="btnMotorStop" class="btn small">MOTOR STOP</button>
+          </div>
+          <label class="ctl">Conveyor speed <output id="speedOut">0.10</output> m/s
+            <input type="range" id="speed" min="0.02" max="0.50" step="0.01" value="0.10">
+          </label>
+          <label class="ctl">Confidence <output id="confOut">0.35</output>
+            <input type="range" id="conf" min="0.05" max="0.90" step="0.05" value="0.35">
+          </label>
+          <div class="btn-row">
+            <button id="btnRec" class="btn">RECORD</button>
+            <button id="btnSnap" class="btn">SNAPSHOT</button>
+          </div>
+          <div class="btn-row">
+            <label class="filebtn btn">LOAD IMAGE<input type="file" id="file" accept="image/*" hidden></label>
+            <button id="btnReset" class="btn">RESET COUNT</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">STATUS</div>
+          <ul class="status">
+            <li><i data-k="camera"></i><span>Camera</span><b id="stCam">stopped</b></li>
+            <li><i data-k="model"></i><span>Model</span><b id="stModel">loading</b></li>
+            <li><i data-k="motor"></i><span>Motor</span><b id="stMotor">stopped</b></li>
+            <li><i data-k="hold"></i><span>Defect hold</span><b id="stHold">--</b></li>
+            <li><i data-k="db"></i><span>Storage</span><b id="stDb">local</b></li>
+            <li><i data-k="queue"></i><span>Queue</span><b id="stQueue">0</b></li>
+            <li><i data-k="rate"></i><span>Rate</span><b id="stRate">0.0 /s</b></li>
+            <li><i data-k="up"></i><span>Uptime</span><b id="stUp">00:00</b></li>
+          </ul>
+        </div>
+
+        <details class="panel" id="camPanel" open>
+          <summary class="panel-title">CAMERA <span class="mono" id="camInfo">no device</span></summary>
+          <label class="ctl">Capture format
+            <select id="camPreset" class="sel"></select>
+          </label>
+          <div id="camCtls"></div>
+          <div class="btn-row">
+            <button id="btnCamAuto" class="btn small">RESET TO AUTO</button>
+          </div>
+          <p class="note" id="camNote">Start the camera to read the settings it allows.</p>
+        </details>
       </div>
-      <div class="stage">
-        <video id="video" playsinline muted></video>
-        <canvas id="webcamCanvas"></canvas>
+    </div>
+
+    <div class="counters panel">
+      <div class="ctr"><b id="cInsp">0</b><span>INSPECTED</span></div>
+      <div class="ctr ok"><b id="cOk">0</b><span>HEALTHY</span></div>
+      <div class="ctr bad"><b id="cBad">0</b><span>DEFECT</span></div>
+      <div class="ctr"><b id="cRate">0.0%</b><span>DEFECT RATE</span></div>
+      <div class="ctr"><b id="cLast">--</b><span>LAST DETECTION</span></div>
+    </div>
+  </section>
+
+  <section class="page" id="page-records">
+    <div class="panel">
+      <div class="panel-title">RECORDED RESULTS</div>
+      <div class="btn-row wrap">
+        <select id="fClass" class="btn small"></select>
+        <button id="btnCsv" class="btn small">EXPORT CSV</button>
+        <button id="btnClear" class="btn small danger">CLEAR ALL</button>
+        <span class="mono" id="recCount">0 records</span>
       </div>
-    </section>
+      <div class="tablewrap">
+        <table id="recTable">
+          <thead><tr><th>#</th><th>TIME</th><th>CLASS</th><th>CONF</th><th>BOX</th><th>SPEED</th><th>EVENT</th><th>DEVICE</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
-    <p class="hint">Detections and counts appear here in real time. On phones, use the <b>Live webcam</b> tab and allow camera access.</p>
-    <div id="counts" class="counts"></div>
-  </main>
+  <section class="page" id="page-stats">
+    <div class="panel">
+      <div class="panel-title">DETECTIONS PER HOUR</div>
+      <canvas id="chartTime" height="170"></canvas>
+    </div>
+    <div class="panel">
+      <div class="panel-title">CLASS SHARE</div>
+      <canvas id="chartShare" height="170"></canvas>
+    </div>
+  </section>
 
-  <footer>
-    <p>Built with <a href="https://github.com/ultralytics/ultralytics" target="_blank" rel="noopener">YOLOv12</a>
-       + <a href="https://onnxruntime.ai/docs/tutorials/web/" target="_blank" rel="noopener">ONNX Runtime Web</a>.
-       Open source — everything runs on your device.</p>
-  </footer>
+  <section class="page" id="page-settings">
+    <div class="panel">
+      <div class="panel-title">SETTINGS</div>
+      <label class="ctl">Device identifier<input id="setDev" type="text" value="pi5-line-01"></label>
+      <label class="ctl">Model file<input id="setModel" type="text" value="model/best.onnx"></label>
+      <label class="ctl">IoU threshold <output id="iouOut">0.45</output>
+        <input type="range" id="iou" min="0.2" max="0.8" step="0.05" value="0.45"></label>
+      <label class="ctl">Max records kept<input id="setMax" type="number" value="2000"></label>
+      <label class="ctl">Stop the motor after a defect stays in view for
+        <output id="holdOut">5.0</output> s
+        <input type="range" id="setHold" min="1" max="20" step="0.5" value="5"></label>
+      <p class="note">Settings are stored in this browser. On the Raspberry Pi the same
+      page is served locally and the service on the device forwards detection records
+      to the online database.</p>
+    </div>
+  </section>
+</div>
 
-  <!-- ONNX Runtime Web (WASM/SIMD) -->
-  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/ort.min.js"></script>
-  <script src="app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/ort.webgpu.min.js"></script>
+<script src="app.js"></script>
+
 </body>
 </html>

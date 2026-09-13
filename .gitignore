@@ -1,12 +1,15 @@
-# Training artifacts (keep the repo light — only best.onnx is needed)
-runs/
-datasets/
-*.pt
-*-1/
+# Python
 __pycache__/
-.ipynb_checkpoints/
+*.pyc
+venv/
 
-# OS / editor
-.DS_Store
-Thumbs.db
-.vscode/
+# Pi runtime data and credentials
+pi/records.jsonl
+pi/.upload_state
+pi/.env
+.env
+
+# Local build and tool output
+.playwright-mcp/
+overleaf_cache/
+*.zip
